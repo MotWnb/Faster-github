@@ -6,6 +6,8 @@ import subprocess
 import win32gui
 import win32con
 import zipfile
+from tqdm import tqdm
+
 
 hosts_file_path = os.path.join(os.environ['SystemRoot'], 'System32', 'drivers', 'etc', 'hosts')
 backup_folder_path = os.path.join(os.getcwd(), 'hosts_backup')
@@ -81,21 +83,27 @@ def clear_backup():
 
 # 下载 fastgithub
 def download_fastgithub():
-    response = requests.get(fastgithub_download_url)
+    response = requests.get(fastgithub_download_url, stream=True)
+    total_size_in_bytes = int(response.headers.get('content-length', 0))
+    block_size = 1024  # 1 Kibibyte
+    progress_bar = tqdm(total=total_size_in_bytes, unit='iB', unit_scale=True)
     with open(fastgithub_zip_path, 'wb') as f:
-        f.write(response.content)
+        for data in response.iter_content(block_size):
+            progress_bar.update(len(data))
+            f.write(data)
+    progress_bar.close()
     with zipfile.ZipFile(fastgithub_zip_path, 'r') as zip_ref:
         zip_ref.extractall(fastgithub_folder_path)
     print('已下载 fastgithub')
 
 # 运行 fastgithub
 def run_fastgithub():
-    fastgithub_exe_path = os.path.join(fastgithub_folder_path, 'fastgithub_win-x64' ,'fastgithub.exe')
+    fastgithub_exe_path = os.path.join(fastgithub_folder_path, 'fastgithub_win-x64' ,'FastGithub.UI.exe')
     if os.path.exists(fastgithub_exe_path):
         subprocess.Popen(fastgithub_exe_path)
         print('正在启动 fastgithub...')
     else:
-        print('未找到 fastgithub.exe，请先下载')
+        print('未找到 FastGithub.UI.exe，请先下载')
 
 while True:
     print('1. 备份 hosts 文件\n2. 恢复 hosts 文件\n3. 更新 hosts 文件\n4. 清空备份\n5. 下载 fastgithub 最新版本并运行\n6. 退出程序')
