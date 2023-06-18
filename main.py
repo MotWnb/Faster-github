@@ -100,12 +100,12 @@ def download_fastgithub():
 
 # 运行 fastgithub
 def run_fastgithub():
-    fastgithub_exe_path = os.path.join(fastgithub_folder_path, 'fastgithub_win-x64' ,'FastGithub.UI.exe')
+    fastgithub_exe_path = os.path.join(fastgithub_folder_path, 'fastgithub_win-x64' ,'FastGithub.exe')
     if os.path.exists(fastgithub_exe_path):
         subprocess.Popen(fastgithub_exe_path)
         print('正在启动 fastgithub...')
     else:
-        print('未找到 FastGithub.UI.exe，请先下载')
+        print('未找到 FastGithub.exe，请先下载')
 
 # 计算文件的 MD5
 def calculate_folder_md5(folder_path):
@@ -142,15 +142,12 @@ while True:
     elif choice == 5:
         md5 = calculate_folder_md5(fastgithub_folder_path)
         print(md5)
-        if md5 == 'cffc7ddb90f0912fa77f898165f3c5e':
-            if is_process_running('FastGithub.UI.exe'):
-                print('\033[91m' + 'FastGithub.UI.exe 正在运行' + '\033[0m')
+        if is_process_running('FastGithub.exe'):
+                print('\033[91m' + 'FastGithub.exe 正在运行' + '\033[0m')
                 continue
-            else:
-                run_fastgithub
         else:
-                download_fastgithub()
-                run_fastgithub()
+            download_fastgithub()
+            run_fastgithub()
         
     elif choice == 6:
         print('bye!')
