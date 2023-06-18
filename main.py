@@ -142,11 +142,13 @@ while True:
     elif choice == 5:
         md5 = calculate_folder_md5(fastgithub_folder_path)
         print(md5)
-        if md5 == 'cffc7ddb90f0912fa77f898165f3c5ef':
+        if md5 == 'cffc7ddb90f0912fa77f898165f3c5e':
             if is_process_running('FastGithub.UI.exe'):
                 print('\033[91m' + 'FastGithub.UI.exe 正在运行' + '\033[0m')
                 continue
             else:
+                run_fastgithub
+        else:
                 download_fastgithub()
                 run_fastgithub()
         
