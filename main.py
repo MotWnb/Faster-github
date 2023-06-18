@@ -7,7 +7,6 @@ import win32gui
 import win32con
 import zipfile
 import autoDownload
-from tqdm import tqdm
 import psutil
 import hashlib
 import os

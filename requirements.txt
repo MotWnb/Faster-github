@@ -1,0 +1,5 @@
+autoDownload==0.0.9
+autoDownload==0.0.9
+psutil==5.9.5
+pywin32==306
+Requests==2.31.0
