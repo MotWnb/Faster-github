@@ -91,9 +91,16 @@ def clear_backup():
     else:
         print('未找到备份文件夹')
 
+
+# 下载文件
+def download_file(url , hosts_file_path):
+    download = autoDownload.AutoDownload(url, hosts_file_path)
+    download.threadNum = 10
+    download.start()
+
 # 下载 fastgithub
 def download_fastgithub():
-    autoDownload.AutoDownload(fastgithub_download_url, fastgithub_zip_path).start()
+    download_file(fastgithub_download_url, fastgithub_zip_path)
     with zipfile.ZipFile(fastgithub_zip_path, 'r') as zip_ref:
         zip_ref.extractall(fastgithub_folder_path)
     print('已下载 fastgithub')
@@ -102,10 +109,11 @@ def download_fastgithub():
 def run_fastgithub():
     fastgithub_exe_path = os.path.join(fastgithub_folder_path, 'fastgithub_win-x64' ,'FastGithub.exe')
     if os.path.exists(fastgithub_exe_path):
-        subprocess.Popen(fastgithub_exe_path)
+        subprocess.Popen(['start', 'cmd', '/k', fastgithub_exe_path], shell=True)
         print('正在启动 fastgithub...')
     else:
         print('未找到 FastGithub.exe，请先下载')
+
 
 # 计算文件的 MD5
 def calculate_folder_md5(folder_path):
@@ -123,35 +131,50 @@ def calculate_folder_md5(folder_path):
 
     return md5.hexdigest()
 
-while True:
-    print('1. 备份 hosts 文件\n2. 恢复 hosts 文件\n3. 更新 hosts 文件\n4. 清空备份\n5. 下载 fastgithub 最新版本并运行\n6. 退出程序')
-    choice = input('请选择功能（输入数字）：')
-    try:
-        choice = int(choice)
-    except ValueError:
-        print('无效的选择')
-        continue
-    if choice == 1:
-        backup_hosts()
-    elif choice == 2:
-        restore_hosts()
-    elif choice == 3:
-        update_hosts()
-    elif choice == 4:
-        clear_backup()
-    elif choice == 5:
-        md5 = calculate_folder_md5(fastgithub_folder_path)
-        print(md5)
-        if is_process_running('FastGithub.exe'):
-                print('\033[91m' + 'FastGithub.exe 正在运行' + '\033[0m')
-                continue
-        else:
-            download_fastgithub()
-            run_fastgithub()
-        
-    elif choice == 6:
-        print('bye!')
-        break
-    else:
-        print('无效的选择')
+# 杀死进程
+def kill_process_by_name(name):
+    for proc in psutil.process_iter(['name']):
+        if proc.info['name'] == name:
+            proc.kill()
+            print(f'{name} 进程已被杀死')
+            return True
+    print(f'未找到名为 {name} 的进程')
+    return False
 
+try:
+    while True:
+        print('1. 备份 hosts 文件\n2. 恢复 hosts 文件\n3. 更新 hosts 文件\n4. 清空备份\n5. 下载 fastgithub 最新版本并运行\n6. 退出')
+        choice = input('请选择功能（输入数字）：')
+        try:
+            choice = int(choice)
+        except ValueError:
+            print('无效的选择')
+            continue
+        if choice == 1:
+            backup_hosts()
+        elif choice == 2:
+            restore_hosts()
+        elif choice == 3:
+            update_hosts()
+        elif choice == 4:
+            clear_backup()
+        elif choice == 5:
+            md5 = calculate_folder_md5(fastgithub_folder_path)
+            print(md5)
+            if is_process_running('FastGithub.exe'):
+                    print('\033[91m' + 'FastGithub.exe 正在运行' + '\033[0m')
+                    continue
+            else:
+                download_fastgithub()
+                run_fastgithub()
+
+        elif choice == 6:
+            print('bye!')
+            break
+        else:
+            print('无效的选择')
+
+except KeyboardInterrupt:
+    kill_process_by_name('fastgithub.exe')
+    kill_process_by_name('dnscrypt-proxy.exe')
+    kill_process_by_name('FastGithub.UI.exe')
